@@ -86,3 +86,43 @@ def registrar_saida(telefone: str):
         "sucesso": True,
         "mensagem": "Qual serviço foi realizado?"
     }
+@app.post("/servico")
+def registrar_servico(telefone: str, servico: str):
+
+    funcionario = (
+        supabase
+        .table("Funcionarios")
+        .select("*")
+        .eq("telefone", telefone)
+        .execute()
+    )
+
+    if not funcionario.data:
+        return {"erro": "Funcionário não encontrado"}
+
+    funcionario_id = funcionario.data[0]["id"]
+
+    apontamento = (
+        supabase
+        .table("Apontamentos")
+        .select("*")
+        .eq("funcionario_id", funcionario_id)
+        .order("id", desc=True)
+        .limit(1)
+        .execute()
+    )
+
+    if not apontamento.data:
+        return {"erro": "Apontamento não encontrado"}
+
+    apontamento_id = apontamento.data[0]["id"]
+
+    supabase.table("Apontamentos").update({
+        "servico": servico,
+        "status": "fechado"
+    }).eq("id", apontamento_id).execute()
+
+    return {
+        "sucesso": True,
+        "mensagem": "Apontamento finalizado"
+    }
