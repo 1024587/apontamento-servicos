@@ -18,5 +18,5 @@ def home():
 
 @app.get("/funcionarios")
 def funcionarios():
-    resultado = supabase.table("funcionarios").select("*").execute()
-    return resultado.data
+    resultado = supabase.table("Funcionarios").select("*").execute()
+    return resultado.datac
