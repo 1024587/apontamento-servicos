@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Query
 from supabase import create_client
 from datetime import datetime
 import os
@@ -10,6 +10,9 @@ key = os.getenv("SUPABASE_KEY")
 
 supabase = create_client(url, key)
 
+VERIFY_TOKEN = "AGUIATEC123"
+
+
 @app.get("/")
 def home():
     return {
@@ -17,10 +20,12 @@ def home():
         "sistema": "apontamento-servicos"
     }
 
+
 @app.get("/funcionarios")
 def funcionarios():
     resultado = supabase.table("Funcionarios").select("*").execute()
     return resultado.data
+
 
 @app.post("/entrada")
 def registrar_entrada(telefone: str):
@@ -38,7 +43,6 @@ def registrar_entrada(telefone: str):
 
     funcionario_id = funcionario.data[0]["id"]
 
-    # Verifica se existe apontamento aberto ou aguardando serviço
     apontamento_aberto = (
         supabase
         .table("Apontamentos")
@@ -63,6 +67,7 @@ def registrar_entrada(telefone: str):
         "sucesso": True,
         "funcionario": funcionario.data[0]["nome"]
     }
+
 
 @app.post("/saida")
 def registrar_saida(telefone: str):
@@ -104,6 +109,7 @@ def registrar_saida(telefone: str):
         "mensagem": "Qual serviço foi realizado?"
     }
 
+
 @app.post("/servico")
 def registrar_servico(telefone: str, servico: str):
 
@@ -144,16 +150,15 @@ def registrar_servico(telefone: str, servico: str):
         "sucesso": True,
         "mensagem": "Apontamento finalizado"
     }
-from fastapi import Request
 
-VERIFY_TOKEN = "AGUIATEC123"
 
 @app.get("/webhook")
 def verificar_webhook(
-    hub_mode: str = None,
-    hub_verify_token: str = None,
-    hub_challenge: str = None
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_verify_token: str = Query(None, alias="hub.verify_token"),
+    hub_challenge: str = Query(None, alias="hub.challenge")
 ):
+
     if hub_verify_token == VERIFY_TOKEN:
         return int(hub_challenge)
 
