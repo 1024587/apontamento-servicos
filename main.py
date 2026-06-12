@@ -38,19 +38,19 @@ def registrar_entrada(telefone: str):
 
     funcionario_id = funcionario.data[0]["id"]
 
-    # Verifica se já existe apontamento aberto
+    # Verifica se existe apontamento aberto ou aguardando serviço
     apontamento_aberto = (
         supabase
         .table("Apontamentos")
         .select("*")
         .eq("funcionario_id", funcionario_id)
-        .eq("status", "aberto")
+        .in_("status", ["aberto", "aguardando_servico"])
         .execute()
     )
 
     if apontamento_aberto.data:
         return {
-            "erro": "Já existe um apontamento aberto para este funcionário"
+            "erro": "Já existe um apontamento em andamento para este funcionário"
         }
 
     supabase.table("Apontamentos").insert({
@@ -95,7 +95,8 @@ def registrar_saida(telefone: str):
     apontamento_id = apontamento.data[0]["id"]
 
     supabase.table("Apontamentos").update({
-        "saida": datetime.utcnow().isoformat()
+        "saida": datetime.utcnow().isoformat(),
+        "status": "aguardando_servico"
     }).eq("id", apontamento_id).execute()
 
     return {
