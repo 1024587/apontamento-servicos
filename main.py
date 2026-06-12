@@ -144,3 +144,28 @@ def registrar_servico(telefone: str, servico: str):
         "sucesso": True,
         "mensagem": "Apontamento finalizado"
     }
+from fastapi import Request
+
+VERIFY_TOKEN = "AGUIATEC123"
+
+@app.get("/webhook")
+def verificar_webhook(
+    hub_mode: str = None,
+    hub_verify_token: str = None,
+    hub_challenge: str = None
+):
+    if hub_verify_token == VERIFY_TOKEN:
+        return int(hub_challenge)
+
+    return {"erro": "Token inválido"}
+
+
+@app.post("/webhook")
+async def receber_webhook(request: Request):
+
+    dados = await request.json()
+
+    print("Mensagem recebida:")
+    print(dados)
+
+    return {"status": "ok"}
