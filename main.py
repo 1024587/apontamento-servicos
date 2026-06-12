@@ -7,3 +7,4 @@ def home():
     return {
         "status": "online",
         "sistema": "apontamento-servicos"
+    }
