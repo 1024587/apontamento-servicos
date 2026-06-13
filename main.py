@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Query
 from supabase import create_client
 from datetime import datetime
+import json
 import os
 
 app = FastAPI()
@@ -170,23 +171,50 @@ async def receber_webhook(request: Request):
 
     dados = await request.json()
 
+    print("")
+    print("======================================")
+    print("WEBHOOK RECEBIDO")
+    print("======================================")
+
+    print(json.dumps(dados, indent=2, ensure_ascii=False))
+
     try:
-        mensagem = (
+
+        valor = (
             dados["entry"][0]
             ["changes"][0]
-            ["value"]["messages"][0]
+            ["value"]
         )
 
-        telefone = mensagem["from"]
-        texto = mensagem["text"]["body"]
+        if "messages" in valor:
 
-        print("====================")
-        print("TELEFONE:", telefone)
-        print("MENSAGEM:", texto)
-        print("====================")
+            mensagem = valor["messages"][0]
 
-    except Exception as e:
-        print("ERRO:", e)
-        print(dados)
+            telefone = mensagem.get("from", "NÃO INFORMADO")
+
+            texto = ""
+
+            if mensagem.get("type") == "text":
+                texto = mensagem["text"]["body"]
+
+            print("")
+            print("######## MENSAGEM DETECTADA ########")
+            print("TELEFONE:", telefone)
+            print("TEXTO:", texto)
+            print("###################################")
+            print("")
+
+        else:
+
+            print("")
+            print("Evento recebido sem campo messages")
+            print("")
+
+    except Exception as erro:
+
+        print("")
+        print("ERRO AO PROCESSAR WEBHOOK")
+        print(str(erro))
+        print("")
 
     return {"status": "ok"}
