@@ -28,7 +28,6 @@ def funcionarios():
     return resultado.data
 
 
-@app.post("/entrada")
 def registrar_entrada(telefone: str):
 
     funcionario = (
@@ -70,7 +69,6 @@ def registrar_entrada(telefone: str):
     }
 
 
-@app.post("/saida")
 def registrar_saida(telefone: str):
 
     funcionario = (
@@ -111,7 +109,6 @@ def registrar_saida(telefone: str):
     }
 
 
-@app.post("/servico")
 def registrar_servico(telefone: str, servico: str):
 
     funcionario = (
@@ -132,13 +129,14 @@ def registrar_servico(telefone: str, servico: str):
         .table("Apontamentos")
         .select("*")
         .eq("funcionario_id", funcionario_id)
+        .eq("status", "aguardando_servico")
         .order("id", desc=True)
         .limit(1)
         .execute()
     )
 
     if not apontamento.data:
-        return {"erro": "Apontamento não encontrado"}
+        return {"erro": "Nenhum apontamento aguardando serviço"}
 
     apontamento_id = apontamento.data[0]["id"]
 
@@ -180,22 +178,18 @@ async def receber_webhook(request: Request):
 
     try:
 
-        valor = (
-            dados["entry"][0]
-            ["changes"][0]
-            ["value"]
-        )
+        valor = dados["entry"][0]["changes"][0]["value"]
 
         if "messages" in valor:
 
             mensagem = valor["messages"][0]
 
-            telefone = mensagem.get("from", "NÃO INFORMADO")
+            telefone = mensagem.get("from", "")
 
             texto = ""
 
             if mensagem.get("type") == "text":
-                texto = mensagem["text"]["body"]
+                texto = mensagem["text"]["body"].strip()
 
             print("")
             print("######## MENSAGEM DETECTADA ########")
@@ -203,6 +197,38 @@ async def receber_webhook(request: Request):
             print("TEXTO:", texto)
             print("###################################")
             print("")
+
+            comando = texto.lower()
+
+            if comando == "entrada":
+
+                resultado = registrar_entrada(telefone)
+
+                print("")
+                print("RESULTADO ENTRADA:")
+                print(resultado)
+                print("")
+
+            elif comando == "saida":
+
+                resultado = registrar_saida(telefone)
+
+                print("")
+                print("RESULTADO SAIDA:")
+                print(resultado)
+                print("")
+
+            else:
+
+                resultado = registrar_servico(
+                    telefone,
+                    texto
+                )
+
+                print("")
+                print("RESULTADO SERVICO:")
+                print(resultado)
+                print("")
 
         else:
 
