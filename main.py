@@ -200,25 +200,38 @@ async def receber_webhook(request: Request):
 
             comando = texto.lower().strip()
 
-print("COMANDO RECEBIDO =", repr(comando))
+            print("COMANDO RECEBIDO =", repr(comando))
 
-if comando == "entrada":
+            if comando == "entrada":
 
-    print("ENTROU EM ENTRADA")
-    resultado = registrar_entrada(telefone)
+                print("ENTROU EM ENTRADA")
 
-elif comando == "saida":
+                resultado = registrar_entrada(telefone)
 
-    print("ENTROU EM SAIDA")
-    resultado = registrar_saida(telefone)
+                print("")
+                print("RESULTADO ENTRADA:")
+                print(resultado)
+                print("")
 
-else:
+            elif comando == "saida":
 
-    print("ENTROU EM SERVICO")
-    resultado = registrar_servico(
-        telefone,
-        texto
-    )
+                print("ENTROU EM SAIDA")
+
+                resultado = registrar_saida(telefone)
+
+                print("")
+                print("RESULTADO SAIDA:")
+                print(resultado)
+                print("")
+
+            else:
+
+                print("ENTROU EM SERVICO")
+
+                resultado = registrar_servico(
+                    telefone,
+                    texto
+                )
 
                 print("")
                 print("RESULTADO SERVICO:")
