@@ -170,9 +170,23 @@ async def receber_webhook(request: Request):
 
     dados = await request.json()
 
-    print("================================")
-    print("WEBHOOK RECEBIDO")
-    print(dados)
-    print("================================")
+    try:
+        mensagem = (
+            dados["entry"][0]
+            ["changes"][0]
+            ["value"]["messages"][0]
+        )
+
+        telefone = mensagem["from"]
+        texto = mensagem["text"]["body"]
+
+        print("====================")
+        print("TELEFONE:", telefone)
+        print("MENSAGEM:", texto)
+        print("====================")
+
+    except Exception as e:
+        print("ERRO:", e)
+        print(dados)
 
     return {"status": "ok"}
